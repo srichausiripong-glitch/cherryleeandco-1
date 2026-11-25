@@ -162,8 +162,19 @@ export const recordArticleEvent = createServerFn({ method: "POST" })
 export const submitClassBookingRequest = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => classBookingInputSchema.parse(input))
   .handler(async ({ data }) => {
+    // Privileged count-only abuse check; never return private booking data.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { count, error: limitError } = await supabaseAdmin.from("class_booking_requests")
+      .select("id", { count: "exact", head: true }).eq("contact", data.contact)
+      .gte("created_at", new Date(Date.now() - 60_000).toISOString());
+    if (limitError) return { ok: false as const, error: "ส่งคำขอจองคลาสไม่สำเร็จ กรุณาลองใหม่อีกครั้งค่ะ" };
+    if (count && count > 0) return { ok: false as const, error: "เพิ่งได้รับคำขอจากข้อมูลติดต่อนี้ กรุณารอสักครู่ก่อนส่งอีกครั้งค่ะ" };
+    const id = crypto.randomUUID();
+    const submittedAt = new Date().toISOString();
     const client = createPublicSupabase();
     const { error } = await client.from("class_booking_requests").insert({
+      id,
+      created_at: submittedAt,
       parent_name: data.parent_name,
       contact: data.contact,
       child_age: data.child_age,
@@ -173,6 +184,8 @@ export const submitClassBookingRequest = createServerFn({ method: "POST" })
       source_path: data.source_path,
     });
     if (error) return { ok: false as const, error: "ส่งคำขอจองคลาสไม่สำเร็จ กรุณาลองใหม่อีกครั้งค่ะ" };
+    const { notifyBookingOwner } = await import("./booking-notification.server");
+    await notifyBookingOwner(id, data, submittedAt);
     return { ok: true as const };
   });
 

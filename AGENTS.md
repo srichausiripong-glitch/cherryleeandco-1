@@ -36,3 +36,4 @@
 - Homepage photos are immutable uploads in private storage; public reads/signing are restricted to paths selected in homepage_content, preserving workspace public-bucket restrictions.
 - Curated article illustrations are mapped by slug in a browser-safe content module using CDN asset pointers; reading pages and index cards share that source, and inline art is inserted only between complete sections so article text stays untouched.
 - Booking management uses authenticated staff-validated server functions and status-only database update privileges; public submissions always start as new, paginated staff lists are newest-first, and compare-and-set status updates prevent silent stale overwrites.
+- Booking notifications use the managed email helper after insertion, with event-derived idempotency and a fixed owner recipient; notification failures never invalidate saved bookings, and a count-only privileged check limits repeat submissions without exposing private data.
