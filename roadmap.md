@@ -15,6 +15,9 @@
 - [ ] Verify authorized login, website saving and public readback (blocked: first authorized teacher account).
 
 # SEO & AEO Articles
+- [x] Create a cohesive set of topic-specific cover and inline illustrations for all ten articles; verify article cards and reading pages on desktop and mobile.
+- [ ] Notify the owner by email after successful class booking requests (blocked: no sender domain configured; setup requested, then scaffold and verify sending to the owner's existing Gmail).
+- [x] Add staff-only booking request list with parent details, submission dates and editable status in /admin; verified public submission, authorized status save/readback, filters and mobile layout; test entries removed.
 - [x] Create public articles database table with RLS and seed first 10 CherryLee & Co. articles.
 - [x] Build public `/articles` index and `/articles/$slug` pages with Q&A structure, SEO metadata, Article/BreadcrumbList/FAQPage JSON-LD, and sitemap inclusion.
 - [x] Add `/admin` articles tab for teachers to create, edit, save drafts, publish, and delete articles.

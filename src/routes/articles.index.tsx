@@ -6,6 +6,8 @@ import { SITE_URL } from "@/content/business";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
+import { getArticleCover } from "@/content/article-artwork";
+import { ArticleThumbnail } from "@/components/ArticleImage";
 
 const articlesQuery = queryOptions({
   queryKey: ["published-articles"],
@@ -64,16 +66,13 @@ function ArticlesIndexPage() {
           <p className="mt-10 text-ink-soft">ยังไม่มีบทความที่เผยแพร่ในขณะนี้ค่ะ</p>
         ) : (
           <ul role="list" className="mt-10 grid gap-6 md:grid-cols-2">
-            {articles.map((article) => (
+            {articles.map((article) => {
+              const cover = getArticleCover(article);
+              return (
               <li key={article.id} className="flex flex-col justify-between overflow-hidden rounded-2xl border-2 border-peach-deep bg-paper">
-                {article.cover_image_url ? (
-                  <Link to="/articles/$slug" params={{ slug: article.slug }} className="block aspect-[16/10] w-full overflow-hidden bg-cream">
-                    <img
-                      src={article.cover_image_url}
-                      alt={article.cover_image_alt || article.title}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]"
-                    />
+                {cover ? (
+                  <Link to="/articles/$slug" params={{ slug: article.slug }} className="block aspect-[4/3] w-full overflow-hidden bg-cream">
+                    <ArticleThumbnail image={cover} />
                   </Link>
                 ) : null}
                 <div className="flex flex-1 flex-col justify-between p-6">
@@ -93,7 +92,7 @@ function ArticlesIndexPage() {
                   </div>
                 </div>
               </li>
-            ))}
+            ); })}
           </ul>
         )}
       </main>

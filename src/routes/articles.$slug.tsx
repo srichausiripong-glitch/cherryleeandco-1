@@ -11,6 +11,9 @@ import { Footer } from "@/components/Footer";
 import { ExternalLink } from "@/components/ExternalLink";
 import { LineIcon } from "@/components/icons";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
+import { ArticleImage } from "@/components/ArticleImage";
+import { articleArtwork, getArticleCover } from "@/content/article-artwork";
+import { Fragment } from "react";
 
 const articlesQuery = queryOptions({
   queryKey: ["published-articles"],
@@ -41,7 +44,7 @@ export const Route = createFileRoute("/articles/$slug")({
       ],
       links: [{ rel: "canonical", href: url }],
       scripts: loaderData
-        ? buildArticleJsonLd(loaderData).map((schema) => ({
+        ? buildArticleJsonLd({ ...loaderData, cover_image_url: getArticleCover(loaderData)?.url ?? "" }).map((schema) => ({
             type: "application/ld+json",
             children: JSON.stringify(schema),
           }))
@@ -66,6 +69,11 @@ function ArticleDetailPage() {
 
   if (!article) return null;
   const blocks = parseArticleBody(article.body);
+  const cover = getArticleCover(article);
+  const inline = articleArtwork[article.slug]?.inline;
+  // Place artwork between complete sections, never between a heading and its paragraph.
+  const headings = blocks.flatMap((block, index) => block.type === "heading" ? [index] : []);
+  const inlineBefore = headings[Math.floor(headings.length / 2)] ?? blocks.length;
   const otherArticles = articles.filter((a) => a.slug !== article.slug);
   const relatedArticles = [
     ...otherArticles.filter((a) => a.category === article.category),
@@ -90,18 +98,7 @@ function ArticleDetailPage() {
           <h1 className="mt-2 font-display text-3xl font-bold leading-tight sm:text-5xl">{article.title}</h1>
           <p className="mt-4 text-lg leading-relaxed text-ink-soft">{article.summary}</p>
 
-          {article.cover_image_url ? (
-            <figure className="mt-8 overflow-hidden rounded-2xl border-2 border-peach-deep bg-paper">
-              <img
-                src={article.cover_image_url}
-                alt={article.cover_image_alt || article.title}
-                className="aspect-[16/10] w-full object-cover"
-              />
-              {article.cover_image_alt ? (
-                <figcaption className="px-4 py-3 text-sm text-ink-soft">{article.cover_image_alt}</figcaption>
-              ) : null}
-            </figure>
-          ) : null}
+          {cover ? <ArticleImage image={cover} cover /> : null}
 
           {article.quick_answer ? (
             <section aria-labelledby="quick-answer-heading" className="mt-8 rounded-2xl border-2 border-peach-deep bg-paper p-6">
@@ -112,18 +109,20 @@ function ArticleDetailPage() {
 
           <div className="mt-10 space-y-6 text-lg leading-relaxed">
             {blocks.map((block, idx) => {
+              const illustration = inline && idx === inlineBefore ? <ArticleImage image={inline} /> : null;
               if (block.type === "heading") {
-                return <h2 key={idx} className="pt-4 font-display text-2xl font-bold">{block.text}</h2>;
+                return <Fragment key={idx}>{illustration}<h2 className="pt-4 font-display text-2xl font-bold">{block.text}</h2></Fragment>;
               }
               if (block.type === "list") {
                 return (
-                  <ul key={idx} role="list" className="list-disc space-y-2 pl-6">
+                  <Fragment key={idx}>{illustration}<ul role="list" className="list-disc space-y-2 pl-6">
                     {(block.items ?? []).map((item, i) => <li key={i}>{item}</li>)}
-                  </ul>
+                  </ul></Fragment>
                 );
               }
-              return <p key={idx}>{block.text}</p>;
+              return <Fragment key={idx}>{illustration}<p>{block.text}</p></Fragment>;
             })}
+            {inline && inlineBefore === blocks.length ? <ArticleImage image={inline} /> : null}
           </div>
 
           {article.faq_items.length > 0 ? (

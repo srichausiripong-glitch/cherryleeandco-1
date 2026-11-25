@@ -1,0 +1,30 @@
+import type { BookingStatus } from "@/lib/bookings";
+
+export const bookingStatusLabels: Record<BookingStatus, string> = {
+  new: "คำขอใหม่",
+  contacted: "ติดต่อแล้ว",
+  confirmed: "ยืนยันการจอง",
+  closed: "ปิดคำขอ",
+};
+export const bookingCopy = {
+  title: "คำขอจองคลาส",
+  all: "ทุกสถานะ",
+  parent: "ผู้ปกครอง",
+  contact: "ช่องทางติดต่อ",
+  age: "อายุน้อง",
+  day: "วันที่สะดวก",
+  package: "แพ็กเกจที่สนใจ",
+  note: "หมายเหตุ",
+  received: "วันที่ส่งคำขอ",
+  status: "สถานะ",
+  save: "บันทึกสถานะ",
+  saving: "กำลังบันทึก…",
+  saved: "บันทึกสถานะเรียบร้อยแล้วค่ะ",
+  failed: "บันทึกสถานะไม่สำเร็จ กรุณาลองใหม่ค่ะ",
+  loading: "กำลังโหลดคำขอจอง…",
+  empty: "ยังไม่มีคำขอจองในสถานะนี้ค่ะ",
+  refresh: "รีเฟรชรายการ",
+  previous: "หน้าก่อนหน้า",
+  next: "หน้าถัดไป",
+  filter: "กรองสถานะคำขอ",
+};

@@ -100,6 +100,7 @@ export type Database = {
           parent_name: string
           preferred_day: string
           source_path: string
+          status: string
         }
         Insert: {
           child_age?: string
@@ -111,6 +112,7 @@ export type Database = {
           parent_name: string
           preferred_day?: string
           source_path?: string
+          status?: string
         }
         Update: {
           child_age?: string
@@ -122,6 +124,7 @@ export type Database = {
           parent_name?: string
           preferred_day?: string
           source_path?: string
+          status?: string
         }
         Relationships: []
       }
