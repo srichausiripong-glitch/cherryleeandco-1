@@ -3,7 +3,13 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { canGenerateClass } from "./class-descriptions";
-import { articleInputSchema, parseFaqItems, type ArticleAnalyticsRow, type ArticleRecord } from "./articles";
+import {
+  articleInputSchema,
+  classBookingInputSchema,
+  parseFaqItems,
+  type ArticleAnalyticsSummary,
+  type ArticleRecord,
+} from "./articles";
 import { z } from "zod";
 
 function createPublicSupabase() {
@@ -153,9 +159,34 @@ export const recordArticleEvent = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+export const submitClassBookingRequest = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => classBookingInputSchema.parse(input))
+  .handler(async ({ data }) => {
+    const client = createPublicSupabase();
+    const { error } = await client.from("class_booking_requests").insert({
+      parent_name: data.parent_name,
+      contact: data.contact,
+      child_age: data.child_age,
+      preferred_day: data.preferred_day,
+      package_interest: data.package_interest,
+      note: data.note,
+      source_path: data.source_path,
+    });
+    if (error) return { ok: false as const, error: "ส่งคำขอจองคลาสไม่สำเร็จ กรุณาลองใหม่อีกครั้งค่ะ" };
+    return { ok: true as const };
+  });
+
+const analyticsRangeSchema = z
+  .object({
+    from: z.string().trim().optional(),
+    to: z.string().trim().optional(),
+  })
+  .optional();
+
 export const getArticleAnalytics = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<ArticleAnalyticsRow[]> => {
+  .inputValidator((input: unknown) => analyticsRangeSchema.parse(input))
+  .handler(async ({ data, context }): Promise<ArticleAnalyticsSummary> => {
     const { data: roles, error: roleError } = await context.supabase
       .from("user_roles")
       .select("role")
@@ -163,11 +194,30 @@ export const getArticleAnalytics = createServerFn({ method: "GET" })
     if (roleError || !canGenerateClass((roles ?? []).map((r) => r.role))) {
       throw new Error("บัญชีนี้ยังไม่ได้รับสิทธิ์ดูสถิติบทความค่ะ");
     }
-    const [{ data: articles, error: articlesError }, { data: events, error: eventsError }] = await Promise.all([
+
+    let eventsQuery = context.supabase.from("article_events").select("slug,event_type,created_at");
+    let bookingsQuery = context.supabase.from("class_booking_requests").select("created_at");
+    if (data?.from) {
+      const fromIso = `${data.from}T00:00:00.000Z`;
+      eventsQuery = eventsQuery.gte("created_at", fromIso);
+      bookingsQuery = bookingsQuery.gte("created_at", fromIso);
+    }
+    if (data?.to) {
+      const toIso = `${data.to}T23:59:59.999Z`;
+      eventsQuery = eventsQuery.lte("created_at", toIso);
+      bookingsQuery = bookingsQuery.lte("created_at", toIso);
+    }
+
+    const [
+      { data: articles, error: articlesError },
+      { data: events, error: eventsError },
+      { data: bookings, error: bookingsError },
+    ] = await Promise.all([
       context.supabase.from("articles").select("slug,title,category,status").order("created_at", { ascending: true }),
-      context.supabase.from("article_events").select("slug,event_type"),
+      eventsQuery,
+      bookingsQuery,
     ]);
-    if (articlesError || eventsError) throw new Error("โหลดข้อมูลสถิติบทความไม่สำเร็จค่ะ");
+    if (articlesError || eventsError || bookingsError) throw new Error("โหลดข้อมูลสถิติบทความไม่สำเร็จค่ะ");
 
     const counts = new Map<string, { views: number; contact_line: number; contact_programs: number }>();
     for (const ev of events ?? []) {
@@ -178,7 +228,7 @@ export const getArticleAnalytics = createServerFn({ method: "GET" })
       counts.set(ev.slug, cur);
     }
 
-    return (articles ?? [])
+    const rows = (articles ?? [])
       .map((a) => {
         const c = counts.get(a.slug) ?? { views: 0, contact_line: 0, contact_programs: 0 };
         const total_clicks = c.contact_line + c.contact_programs;
@@ -196,4 +246,21 @@ export const getArticleAnalytics = createServerFn({ method: "GET" })
         };
       })
       .sort((a, b) => b.total_clicks - a.total_clicks || b.views - a.views);
+
+    const monthMap = new Map<string, number>();
+    for (const b of bookings ?? []) {
+      const month = b.created_at.slice(0, 7);
+      monthMap.set(month, (monthMap.get(month) ?? 0) + 1);
+    }
+    const monthlyBookings = Array.from(monthMap.entries())
+      .map(([month, count]) => ({ month, count }))
+      .sort((a, b) => b.month.localeCompare(a.month));
+    const currentMonth = new Date().toISOString().slice(0, 7);
+
+    return {
+      rows,
+      totalBookings: (bookings ?? []).length,
+      currentMonthBookings: monthMap.get(currentMonth) ?? 0,
+      monthlyBookings,
+    };
   });

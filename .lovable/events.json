@@ -33,6 +33,34 @@
         }
       }
     },
+    "project.class_booking_submitted": {
+      "event_schema_version": 1,
+      "description": "A parent successfully submitted a class booking request form.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "preferred_day",
+          "package_interest",
+          "source_path"
+        ],
+        "properties": {
+          "preferred_day": {
+            "type": "string"
+          },
+          "package_interest": {
+            "type": "string"
+          },
+          "source_path": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "project.homepage_booking_click": {
       "event_schema_version": 1,
       "description": "A visitor clicked a contact or class booking button on the homepage.",

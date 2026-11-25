@@ -23,3 +23,6 @@
 - [x] Add cover images (`cover_image_url`, `cover_image_alt`) to articles and expand all 10 articles to 500+ words.
 - [x] Add an analytics dashboard tab in `/admin` comparing views, contact clicks, and class registration clicks per article.
 - [x] Instrument homepage contact and class booking clicks (`project.homepage_booking_click`) to track monthly class booking requests.
+- [x] Audit all 10 articles for 500+ word depth and smooth parent-friendly Thai copy.
+- [x] Add class booking request form with database storage, `project.class_booking_submitted` tracking, and monthly booking count in `/admin`.
+- [x] Add date-range filter and CSV export to `/admin` article analytics dashboard.

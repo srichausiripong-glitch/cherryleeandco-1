@@ -89,6 +89,42 @@ export type Database = {
         }
         Relationships: []
       }
+      class_booking_requests: {
+        Row: {
+          child_age: string
+          contact: string
+          created_at: string
+          id: string
+          note: string
+          package_interest: string
+          parent_name: string
+          preferred_day: string
+          source_path: string
+        }
+        Insert: {
+          child_age?: string
+          contact: string
+          created_at?: string
+          id?: string
+          note?: string
+          package_interest?: string
+          parent_name: string
+          preferred_day?: string
+          source_path?: string
+        }
+        Update: {
+          child_age?: string
+          contact?: string
+          created_at?: string
+          id?: string
+          note?: string
+          package_interest?: string
+          parent_name?: string
+          preferred_day?: string
+          source_path?: string
+        }
+        Relationships: []
+      }
       homepage_content: {
         Row: {
           id: string

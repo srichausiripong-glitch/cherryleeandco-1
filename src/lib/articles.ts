@@ -56,6 +56,28 @@ export interface ArticleAnalyticsRow {
   conversion_rate: number;
 }
 
+export interface MonthlyBookingCount {
+  month: string;
+  count: number;
+}
+
+export interface ArticleAnalyticsSummary {
+  rows: ArticleAnalyticsRow[];
+  totalBookings: number;
+  currentMonthBookings: number;
+  monthlyBookings: MonthlyBookingCount[];
+}
+
+export const classBookingInputSchema = z.object({
+  parent_name: z.string().trim().min(1, "กรุณากรอกชื่อผู้ปกครองค่ะ").max(120),
+  contact: z.string().trim().min(3, "กรุณากรอกเบอร์โทรหรือ LINE ID ค่ะ").max(120),
+  child_age: z.string().trim().max(40).default(""),
+  preferred_day: z.enum(["เสาร์", "อาทิตย์", "เสาร์หรืออาทิตย์"]).default("เสาร์"),
+  package_interest: z.string().trim().max(80).default("รายครั้ง (1,600 บาท)"),
+  note: z.string().trim().max(500).default(""),
+  source_path: z.string().trim().max(200).default("/"),
+});
+
 export function parseFaqItems(raw: unknown): FaqItem[] {
   const parsed = z.array(faqItemSchema).safeParse(raw);
   return parsed.success ? parsed.data : [];

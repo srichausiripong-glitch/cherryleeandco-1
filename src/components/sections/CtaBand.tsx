@@ -2,6 +2,7 @@ import { useLanguage } from "@/i18n/LanguageProvider";
 import { LineIcon, MessengerIcon } from "../icons";
 import { ExternalLink } from "../ExternalLink";
 import { Flower, Seaweed } from "../Decor";
+import { ClassBookingForm } from "../ClassBookingForm";
 
 export function CtaBand() {
   const { t, business, images } = useLanguage();
@@ -47,6 +48,7 @@ export function CtaBand() {
               {c.messenger}
             </ExternalLink>
           </div>
+          <ClassBookingForm sourcePath="/" />
         </div>
       </div>
     </section>
