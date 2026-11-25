@@ -8,6 +8,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ExternalLink } from "@/components/ExternalLink";
 import { LineIcon } from "@/components/icons";
+import { LanguageProvider } from "@/i18n/LanguageProvider";
 
 const articleQuery = (slug: string) =>
   queryOptions({
@@ -55,6 +56,7 @@ function ArticleDetailPage() {
   const blocks = parseArticleBody(article.body);
 
   return (
+    <LanguageProvider>
     <div className="min-h-screen bg-cream text-ink">
       <Header />
       <main id="main" className="container-site py-12 sm:py-16">
@@ -126,5 +128,6 @@ function ArticleDetailPage() {
       </main>
       <Footer />
     </div>
+    </LanguageProvider>
   );
 }

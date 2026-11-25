@@ -5,13 +5,14 @@ import { listPublishedArticles } from "@/lib/articles.functions";
 import { SITE_URL } from "@/content/business";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { LanguageProvider } from "@/i18n/LanguageProvider";
 
 const articlesQuery = queryOptions({
   queryKey: ["published-articles"],
   queryFn: () => listPublishedArticles(),
 });
 
-export const Route = createFileRoute("/articles")({
+export const Route = createFileRoute("/articles/")({
   staticData: { sitemap: true },
   loader: ({ context }) => context.queryClient.ensureQueryData(articlesQuery),
   head: () => ({
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/articles")({
 function ArticlesIndexPage() {
   const { data: articles } = useSuspenseQuery(articlesQuery);
   return (
+    <LanguageProvider>
     <div className="min-h-screen bg-cream text-ink">
       <Header />
       <main id="main" className="container-site py-12 sm:py-16">
@@ -85,5 +87,6 @@ function ArticlesIndexPage() {
       </main>
       <Footer />
     </div>
+    </LanguageProvider>
   );
 }
