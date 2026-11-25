@@ -55,6 +55,11 @@ function ArticleDetailPage() {
   const article = articles.find((a) => a.slug === slug) ?? null;
   if (!article) return null;
   const blocks = parseArticleBody(article.body);
+  const otherArticles = articles.filter((a) => a.slug !== article.slug);
+  const relatedArticles = [
+    ...otherArticles.filter((a) => a.category === article.category),
+    ...otherArticles.filter((a) => a.category !== article.category),
+  ].slice(0, 3);
 
   return (
     <LanguageProvider>
@@ -117,14 +122,65 @@ function ArticleDetailPage() {
               ทักคุยกับครูเชอร์รี่และทีม CherryLee &amp; Co. ได้ทาง LINE @cherryleeandco ยินดีให้คำปรึกษาค่ะ
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-4">
-              <ExternalLink href={LINE_URL} className="btn btn-primary btn-sm">
+              <ExternalLink
+                href={LINE_URL}
+                className="btn btn-primary btn-sm"
+                onClick={() =>
+                  window.__lovableEvents?.track?.("project.article_contact_click", {
+                    slug: article.slug,
+                    category: article.category,
+                    channel: "line",
+                  })
+                }
+              >
                 <LineIcon /> ทัก LINE @cherryleeandco
               </ExternalLink>
+              <Link
+                to="/"
+                hash="programs"
+                className="btn btn-secondary btn-sm"
+                onClick={() =>
+                  window.__lovableEvents?.track?.("project.article_contact_click", {
+                    slug: article.slug,
+                    category: article.category,
+                    channel: "programs",
+                  })
+                }
+              >
+                ดูตารางเรียนและสมัครคลาส
+              </Link>
               <Link to="/articles" className="inline-flex min-h-11 items-center gap-2 font-semibold text-ink underline-offset-4 hover:underline">
                 <ArrowLeft className="h-4 w-4" aria-hidden="true" /> กลับไปหน้ารวมบทความ
               </Link>
             </div>
           </section>
+
+          {relatedArticles.length > 0 ? (
+            <section aria-labelledby="related-articles-heading" className="mt-12 border-t-2 border-peach-deep pt-10">
+              <h2 id="related-articles-heading" className="font-display text-2xl font-bold">บทความที่เกี่ยวข้อง</h2>
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                {relatedArticles.map((related) => (
+                  <Link
+                    key={related.slug}
+                    to="/articles/$slug"
+                    params={{ slug: related.slug }}
+                    className="flex flex-col rounded-2xl border-2 border-peach-deep bg-paper p-5 transition-colors hover:border-cherry"
+                    onClick={() =>
+                      window.__lovableEvents?.track?.("project.related_article_click", {
+                        from_slug: article.slug,
+                        to_slug: related.slug,
+                        category: related.category,
+                      })
+                    }
+                  >
+                    <span className="text-xs font-semibold text-cherry">{related.category}</span>
+                    <h3 className="mt-2 font-display text-lg font-bold leading-snug">{related.title}</h3>
+                    <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-ink-soft">{related.summary}</p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </article>
       </main>
       <Footer />

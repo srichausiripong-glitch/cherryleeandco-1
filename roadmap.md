@@ -18,3 +18,5 @@
 - [x] Create public articles database table with RLS and seed first 10 CherryLee & Co. articles.
 - [x] Build public `/articles` index and `/articles/$slug` pages with Q&A structure, SEO metadata, Article/BreadcrumbList/FAQPage JSON-LD, and sitemap inclusion.
 - [x] Add `/admin` articles tab for teachers to create, edit, save drafts, publish, and delete articles.
+- [x] Add related articles section and contact/register CTA buttons at the bottom of each article page.
+- [x] Instrument article contact/register clicks and related article clicks via built-in Lovable events (`window.__lovableEvents?.track?.`) and validate `.lovable/events.json`.

@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "events": {
+    "project.article_contact_click": {
+      "event_schema_version": 1,
+      "description": "A visitor clicked a contact or class registration button at the bottom of an article.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "slug",
+          "category",
+          "channel"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "line",
+              "programs"
+            ]
+          }
+        }
+      }
+    },
+    "project.related_article_click": {
+      "event_schema_version": 1,
+      "description": "A visitor clicked a related article card at the bottom of an article.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "from_slug",
+          "to_slug",
+          "category"
+        ],
+        "properties": {
+          "from_slug": {
+            "type": "string"
+          },
+          "to_slug": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
