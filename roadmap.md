@@ -17,7 +17,7 @@
 # SEO & AEO Articles
 - [x] Create a cohesive set of topic-specific cover and inline illustrations for all ten articles; verify article cards and reading pages on desktop and mobile.
 - [x] Prepare managed email templates and owner notifications after successful booking saves, preserving bookings on email failure.
-- [ ] Verify live booking email delivery (blocked: cherryleeandco.com DNS verification pending; publish required).
+- [x] Verify live booking email delivery: sender domain cherryleeandco.com is active, a real homepage submission stored its row and a `sent` event reached the owner's Gmail one second later; test entry removed.
 - [x] Add staff-only booking request list with parent details, submission dates and editable status in /admin; verified public submission, authorized status save/readback, filters and mobile layout; test entries removed.
 - [x] Create public articles database table with RLS and seed first 10 CherryLee & Co. articles.
 - [x] Build public `/articles` index and `/articles/$slug` pages with Q&A structure, SEO metadata, Article/BreadcrumbList/FAQPage JSON-LD, and sitemap inclusion.
@@ -31,4 +31,4 @@
 - [x] Add class booking request form with database storage, `project.class_booking_submitted` tracking, and monthly booking count in `/admin`.
 - [x] Add date-range filter and CSV export to `/admin` article analytics dashboard.
 - [x] Add search by parent name, submitted-date range and clear-filters controls to the `/admin` booking list; filters combine with the status filter, page back to the first page, and were verified signed-in with real rows.
-- [ ] Fix `src/start.ts` server-only import that broke the preview (done in this change: middleware context supplies `pathname`); re-check preview after publish.
+- [x] Fix `src/start.ts` server-only import that broke the preview: middleware context supplies `pathname`, so the client bundle no longer denies `@tanstack/react-start/server`.
