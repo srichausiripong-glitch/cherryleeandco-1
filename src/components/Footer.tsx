@@ -1,9 +1,10 @@
 import { Mail } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { FacebookIcon, InstagramIcon, LineIcon, TikTokIcon, YouTubeIcon } from "./icons";
 
 export function Footer() {
-  const { t, business, images } = useLanguage();
+  const { lang, t, business, images } = useLanguage();
   const f = t.footer;
   const links = t.nav.items.filter((i) => i.href !== "#faq");
   const social = [
@@ -36,13 +37,21 @@ export function Footer() {
             {links.map((l) => (
               <li key={l.href}>
                 <a
-                  href={l.href}
+                  href={`/${l.href}`}
                   className="inline-flex min-h-11 min-w-11 items-center text-white no-underline hover:text-white hover:underline"
                 >
                   {l.label}
                 </a>
               </li>
             ))}
+            <li>
+              <Link
+                to="/articles"
+                className="inline-flex min-h-11 min-w-11 items-center text-white no-underline hover:text-white hover:underline"
+              >
+                {lang === "th" ? "บทความ" : "Articles"}
+              </Link>
+            </li>
           </ul>
         </nav>
         <div>

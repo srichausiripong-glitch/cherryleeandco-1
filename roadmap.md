@@ -13,3 +13,8 @@
 - [x] Enable Cloud and teacher authentication.
 - [x] Connect website content editing and public readback; AI drafts remain separate and do not publish.
 - [ ] Verify authorized login, website saving and public readback (blocked: first authorized teacher account).
+
+# SEO & AEO Articles
+- [x] Create public articles database table with RLS and seed first 10 CherryLee & Co. articles.
+- [x] Build public `/articles` index and `/articles/$slug` pages with Q&A structure, SEO metadata, Article/BreadcrumbList/FAQPage JSON-LD, and sitemap inclusion.
+- [x] Add `/admin` articles tab for teachers to create, edit, save drafts, publish, and delete articles.

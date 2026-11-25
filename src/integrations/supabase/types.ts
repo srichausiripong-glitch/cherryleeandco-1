@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      articles: {
+        Row: {
+          author_id: string | null
+          body: string
+          category: string
+          created_at: string
+          faq_items: Json
+          id: string
+          published_at: string | null
+          quick_answer: string
+          slug: string
+          status: string
+          summary: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          body?: string
+          category?: string
+          created_at?: string
+          faq_items?: Json
+          id?: string
+          published_at?: string | null
+          quick_answer?: string
+          slug: string
+          status?: string
+          summary?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          body?: string
+          category?: string
+          created_at?: string
+          faq_items?: Json
+          id?: string
+          published_at?: string | null
+          quick_answer?: string
+          slug?: string
+          status?: string
+          summary?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       homepage_content: {
         Row: {
           id: string

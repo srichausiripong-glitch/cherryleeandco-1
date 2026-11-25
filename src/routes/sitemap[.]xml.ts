@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getRouterInstance } from "@tanstack/react-start";
-import { sitemapStaticPaths, sitemapXML, type SitemapEntry } from "@/lib/sitemap";
+import { sitemapPathForLocation, sitemapStaticPaths, sitemapXML, type SitemapEntry } from "@/lib/sitemap";
+import { listPublishedArticles } from "@/lib/articles.functions";
 
 const BASE_URL = "https://cherryleeandco.com";
 
@@ -17,7 +18,16 @@ export const Route = createFileRoute("/sitemap.xml")({
         }
         const router = await getRouterInstance();
         const entries: SitemapEntry[] = sitemapStaticPaths(router).map((path) => ({ path }));
-        // Add queries for dynamic pages selected for SEO, using sitemapPathForLocation.
+        try {
+          const articles = await listPublishedArticles();
+          for (const article of articles) {
+            const location = router.buildLocation({ to: "/articles/$slug", params: { slug: article.slug } });
+            const path = sitemapPathForLocation(router, location, "/articles/$slug");
+            if (path) entries.push({ path, lastmod: article.updated_at.slice(0, 10) });
+          }
+        } catch {
+          // Keep static sitemap entries available if article query fails.
+        }
         if (entries.length === 0) {
           return new Response(
             'No pages are included in this sitemap. Check route decisions and ancestor exclusions. Setting "exclude-subtree" on the root excludes the entire site.',

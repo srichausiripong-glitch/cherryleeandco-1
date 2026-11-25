@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FocusEvent, type MouseEvent } from "react";
 import { Menu, X } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useLanguage } from "@/i18n/LanguageProvider";
 import { content, type Lang } from "@/content/site";
 import { LineIcon } from "./icons";
@@ -105,8 +106,8 @@ export function Header() {
       }`}
     >
       <div className="container-site flex min-h-[72px] items-center gap-4 nav:gap-6">
-        <a
-          href="#top"
+        <Link
+          to="/"
           aria-label={t.brand.homeLabel}
           className="mr-auto inline-flex min-h-11 items-center gap-2 no-underline"
         >
@@ -124,7 +125,7 @@ export function Header() {
             alt=""
             className="h-[15px] w-auto xs:h-[18px]"
           />
-        </a>
+        </Link>
 
         <nav
           id="site-nav"
@@ -140,7 +141,7 @@ export function Header() {
               return (
                 <li key={item.href}>
                   <a
-                    href={item.href}
+                    href={`/${item.href}`}
                     onClick={onNavClick}
                     aria-current={isActive ? "location" : undefined}
                     className={`flex min-h-[52px] items-center whitespace-nowrap rounded-full px-4 py-2 font-display text-lg font-medium text-ink no-underline transition-colors duration-200 hover:bg-cherry-soft hover:text-ink nav:min-h-11 nav:px-3 nav:py-1 nav:font-sans nav:text-base ${
@@ -152,6 +153,15 @@ export function Header() {
                 </li>
               );
             })}
+            <li>
+              <Link
+                to="/articles"
+                onClick={() => setOpen(false)}
+                className="flex min-h-[52px] items-center whitespace-nowrap rounded-full px-4 py-2 font-display text-lg font-medium text-ink no-underline transition-colors duration-200 hover:bg-cherry-soft hover:text-ink nav:min-h-11 nav:px-3 nav:py-1 nav:font-sans nav:text-base"
+              >
+                {lang === "th" ? "บทความ" : "Articles"}
+              </Link>
+            </li>
           </ul>
           <ExternalLink
             href={business.lineUrl}
