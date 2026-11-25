@@ -1,15 +1,27 @@
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronLeft, ChevronRight, RefreshCw, Save } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCw, Save, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { bookingCopy as c, bookingStatusLabels } from "@/content/admin/bookings";
-import { bookingPageSize, bookingStatusSchema, bookingStatuses, type BookingRequest, type BookingStatus } from "@/lib/bookings";
+import {
+  bookingPageSize,
+  bookingStatusSchema,
+  bookingStatuses,
+  hasBookingFilter,
+  sanitizeBookingSearch,
+  type BookingFilters,
+  type BookingRequest,
+  type BookingStatus,
+} from "@/lib/bookings";
 import { listBookingRequests, updateBookingStatus } from "@/lib/bookings.functions";
 
-function makeBookingsQuery(page: number, status: BookingStatus | "all") {
-  return queryOptions({ queryKey: ["admin-booking-requests", page, status], queryFn: () => listBookingRequests({ data: { page, status } }) });
+function makeBookingsQuery(page: number, filters: BookingFilters) {
+  return queryOptions({
+    queryKey: ["admin-booking-requests", page, filters.status, filters.q, filters.from, filters.to],
+    queryFn: () => listBookingRequests({ data: { page, status: filters.status, q: filters.q, from: filters.from, to: filters.to } }),
+  });
 }
 
 function BookingItem({ request }: { request: BookingRequest }) {
@@ -60,12 +72,13 @@ function BookingItem({ request }: { request: BookingRequest }) {
   );
 }
 
-function BookingList({ page, status, setPage }: { page: number; status: BookingStatus | "all"; setPage: (page: number) => void }) {
-  const { data } = useSuspenseQuery(makeBookingsQuery(page, status));
+function BookingList({ page, filters, setPage }: { page: number; filters: BookingFilters; setPage: (page: number) => void }) {
+  const { data } = useSuspenseQuery(makeBookingsQuery(page, filters));
   const totalPages = Math.max(1, Math.ceil(data.total / bookingPageSize));
+  const filtered = hasBookingFilter(filters);
   return <>
-    <p className="text-sm text-muted-foreground">{c.title} {data.total.toLocaleString("th-TH")} รายการ</p>
-    {data.requests.length ? <ul role="list" className="space-y-4">{data.requests.map((request) => <BookingItem key={request.id} request={request} />)}</ul> : <p role="status" className="border-y border-border py-12 text-center text-muted-foreground">{c.empty}</p>}
+    <p className="text-sm text-muted-foreground">{filtered ? c.filtered : c.title} {data.total.toLocaleString("th-TH")} รายการ</p>
+    {data.requests.length ? <ul role="list" className="space-y-4">{data.requests.map((request) => <BookingItem key={request.id} request={request} />)}</ul> : <p role="status" className="border-y border-border py-12 text-center text-muted-foreground">{filtered ? c.emptyFiltered : c.empty}</p>}
     <nav aria-label="หน้ารายการคำขอจอง" className="flex items-center justify-end gap-3">
       <Button variant="outline" size="icon" className="h-11 w-11" title={c.previous} aria-label={c.previous} disabled={page === 0} onClick={() => setPage(page - 1)}><ChevronLeft /></Button>
       <span className="text-sm">{page + 1} / {totalPages}</span>
@@ -78,17 +91,62 @@ export function BookingRequests() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
   const [status, setStatus] = useState<BookingStatus | "all">("all");
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+
+  // Wait for typing to settle before asking the server again.
+  useEffect(() => {
+    const timer = setTimeout(() => setSearch(sanitizeBookingSearch(searchInput)), 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  const filters: BookingFilters = { status, q: search, from, to };
+  const filtered = hasBookingFilter(filters);
+
+  useEffect(() => { setPage(0); }, [status, search, from, to]);
+
+  function clearFilters() {
+    setStatus("all");
+    setSearchInput("");
+    setSearch("");
+    setFrom("");
+    setTo("");
+  }
+
   return <section className="space-y-6">
     <div className="flex flex-wrap items-center justify-between gap-4">
       <h2 className="font-display text-2xl font-bold">{c.title}</h2>
       <div className="flex flex-wrap items-center gap-3">
-        <Select value={status} onValueChange={(value) => { const parsed = bookingStatusSchema.safeParse(value); setStatus(parsed.success ? parsed.data : "all"); setPage(0); }}>
+        <Select value={status} onValueChange={(value) => { const parsed = bookingStatusSchema.safeParse(value); setStatus(parsed.success ? parsed.data : "all"); }}>
           <SelectTrigger aria-label={c.filter} className="min-h-11 w-44"><SelectValue /></SelectTrigger>
           <SelectContent><SelectItem value="all">{c.all}</SelectItem>{bookingStatuses.map((s) => <SelectItem key={s} value={s}>{bookingStatusLabels[s]}</SelectItem>)}</SelectContent>
         </Select>
         <Button variant="outline" size="icon" className="h-11 w-11" title={c.refresh} aria-label={c.refresh} onClick={() => void queryClient.invalidateQueries({ queryKey: ["admin-booking-requests"] })}><RefreshCw /></Button>
       </div>
     </div>
-    <Suspense fallback={<p role="status">{c.loading}</p>}><BookingList page={page} status={status} setPage={setPage} /></Suspense>
+    <div className="grid gap-4 rounded-lg border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_auto_auto_auto]">
+      <div>
+        <label htmlFor="booking-search" className="mb-2 block text-sm font-medium">{c.search}</label>
+        <div className="relative">
+          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input id="booking-search" type="search" value={searchInput} onChange={(event) => setSearchInput(event.target.value)} placeholder={c.searchExample} aria-describedby="booking-search-hint" className="min-h-11 w-full rounded-md border border-border bg-background pl-9 pr-3" />
+        </div>
+        <p id="booking-search-hint" className="mt-2 text-xs text-muted-foreground">{c.searchHint}</p>
+      </div>
+      <div>
+        <label htmlFor="booking-from" className="mb-2 block text-sm font-medium">{c.from}</label>
+        <input id="booking-from" type="date" value={from} max={to || undefined} onChange={(event) => setFrom(event.target.value)} className="min-h-11 w-full rounded-md border border-border bg-background px-3 sm:w-44" />
+      </div>
+      <div>
+        <label htmlFor="booking-to" className="mb-2 block text-sm font-medium">{c.to}</label>
+        <input id="booking-to" type="date" value={to} min={from || undefined} onChange={(event) => setTo(event.target.value)} className="min-h-11 w-full rounded-md border border-border bg-background px-3 sm:w-44" />
+      </div>
+      <div className="flex items-end">
+        <Button variant="outline" className="min-h-11 w-full" disabled={!filtered} onClick={clearFilters}><X aria-hidden="true" />{c.clear}</Button>
+      </div>
+    </div>
+    <Suspense fallback={<p role="status">{c.loading}</p>}><BookingList page={page} filters={filters} setPage={setPage} /></Suspense>
   </section>;
 }

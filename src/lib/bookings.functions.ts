@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { bookingListSchema, bookingStatusUpdateSchema, bookingPageSize, canManageBookings } from "./bookings";
+import { bookingListSchema, bookingStatusUpdateSchema, bookingPageSize, bookingDateBounds, canManageBookings, sanitizeBookingSearch } from "./bookings";
 
 export const listBookingRequests = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -14,6 +14,11 @@ export const listBookingRequests = createServerFn({ method: "GET" })
       .select("id,parent_name,contact,child_age,preferred_day,package_interest,note,source_path,created_at,status", { count: "exact" })
       .order("created_at", { ascending: false }).order("id", { ascending: false });
     if (data.status !== "all") query = query.eq("status", data.status);
+    const search = sanitizeBookingSearch(data.q);
+    if (search) query = query.ilike("parent_name", `%${search}%`);
+    const bounds = bookingDateBounds(data.from, data.to);
+    if (bounds.from) query = query.gte("created_at", bounds.from);
+    if (bounds.to) query = query.lte("created_at", bounds.to);
     const { data: requests, count, error } = await query.range(data.page * bookingPageSize, (data.page + 1) * bookingPageSize - 1);
     if (error) throw new Error("โหลดคำขอจองไม่สำเร็จค่ะ");
     return { requests: requests ?? [], total: count ?? 0 };

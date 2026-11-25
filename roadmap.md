@@ -30,3 +30,5 @@
 - [x] Audit all 10 articles for 500+ word depth and smooth parent-friendly Thai copy.
 - [x] Add class booking request form with database storage, `project.class_booking_submitted` tracking, and monthly booking count in `/admin`.
 - [x] Add date-range filter and CSV export to `/admin` article analytics dashboard.
+- [x] Add search by parent name, submitted-date range and clear-filters controls to the `/admin` booking list; filters combine with the status filter, page back to the first page, and were verified signed-in with real rows.
+- [ ] Fix `src/start.ts` server-only import that broke the preview (done in this change: middleware context supplies `pathname`); re-check preview after publish.

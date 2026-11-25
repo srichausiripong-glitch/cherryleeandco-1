@@ -1,11 +1,12 @@
 import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
 
 import { renderErrorPage } from "./lib/error-page";
 import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
 
-const errorMiddleware = createMiddleware().server(async ({ next }) => {
-  if (new URL(getRequest().url).pathname.startsWith("/lovable/")) return next();
+// `pathname` comes from the middleware context, so this file stays free of
+// server-only imports: src/start.ts is loaded in the client bundle too.
+const errorMiddleware = createMiddleware().server(async ({ next, pathname }) => {
+  if (pathname.startsWith("/lovable/")) return next();
   try {
     return await next();
   } catch (error) {
@@ -24,7 +25,7 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
 // file opts out, so re-add it explicitly to keep server functions protected
 // from cross-site requests.
 const csrfMiddleware = createCsrfMiddleware({
-  filter: (ctx) => !new URL(getRequest().url).pathname.startsWith("/lovable/") && ctx.handlerType === "serverFn",
+  filter: (ctx) => !ctx.pathname.startsWith("/lovable/") && ctx.handlerType === "serverFn",
 });
 
 export const startInstance = createStart(() => ({
