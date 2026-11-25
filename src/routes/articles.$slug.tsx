@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { getPublishedArticleBySlug } from "@/lib/articles.functions";
+import { listPublishedArticles } from "@/lib/articles.functions";
 import { buildArticleJsonLd, parseArticleBody } from "@/lib/articles";
 import { SITE_URL, LINE_URL } from "@/content/business";
 import { Header } from "@/components/Header";
@@ -10,16 +10,16 @@ import { ExternalLink } from "@/components/ExternalLink";
 import { LineIcon } from "@/components/icons";
 import { LanguageProvider } from "@/i18n/LanguageProvider";
 
-const articleQuery = (slug: string) =>
-  queryOptions({
-    queryKey: ["published-article", slug],
-    queryFn: () => getPublishedArticleBySlug({ data: { slug } }),
-  });
+const articlesQuery = queryOptions({
+  queryKey: ["published-articles"],
+  queryFn: () => listPublishedArticles(),
+});
 
 export const Route = createFileRoute("/articles/$slug")({
   staticData: { sitemap: true },
   loader: async ({ params, context }) => {
-    const article = await context.queryClient.ensureQueryData(articleQuery(params.slug));
+    const articles = await context.queryClient.ensureQueryData(articlesQuery);
+    const article = articles.find((a) => a.slug === params.slug) ?? null;
     if (!article) throw notFound();
     return article;
   },
@@ -51,7 +51,8 @@ export const Route = createFileRoute("/articles/$slug")({
 
 function ArticleDetailPage() {
   const { slug } = Route.useParams();
-  const { data: article } = useSuspenseQuery(articleQuery(slug));
+  const { data: articles } = useSuspenseQuery(articlesQuery);
+  const article = articles.find((a) => a.slug === slug) ?? null;
   if (!article) return null;
   const blocks = parseArticleBody(article.body);
 

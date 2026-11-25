@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as ArticlesRouteImport } from './routes/articles'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArticlesRoute = ArticlesRouteImport.update({
+  id: '/articles',
+  path: '/articles',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -42,18 +48,19 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ArticlesIndexRoute = ArticlesIndexRouteImport.update({
-  id: '/articles/',
-  path: '/articles/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => ArticlesRoute,
 } as any)
 const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
-  id: '/articles/$slug',
-  path: '/articles/$slug',
-  getParentRoute: () => rootRouteImport,
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ArticlesRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/articles': typeof ArticlesRouteWithChildren
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -72,6 +79,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/articles': typeof ArticlesRouteWithChildren
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -81,7 +89,13 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/sitemap.xml' | '/admin' | '/articles/$slug' | '/articles/'
+    | '/'
+    | '/articles'
+    | '/auth'
+    | '/sitemap.xml'
+    | '/admin'
+    | '/articles/$slug'
+    | '/articles/'
   fileRoutesByTo: FileRoutesByTo
   to:
     '/' | '/auth' | '/sitemap.xml' | '/admin' | '/articles/$slug' | '/articles'
@@ -89,6 +103,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/articles'
     | '/auth'
     | '/sitemap.xml'
     | '/_authenticated/admin'
@@ -99,10 +114,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  ArticlesRoute: typeof ArticlesRouteWithChildren
   AuthRoute: typeof AuthRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  ArticlesSlugRoute: typeof ArticlesSlugRoute
-  ArticlesIndexRoute: typeof ArticlesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -119,6 +133,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/articles': {
+      id: '/articles'
+      path: '/articles'
+      fullPath: '/articles'
+      preLoaderRoute: typeof ArticlesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -144,17 +165,17 @@ declare module '@tanstack/react-router' {
     }
     '/articles/': {
       id: '/articles/'
-      path: '/articles'
+      path: '/'
       fullPath: '/articles/'
       preLoaderRoute: typeof ArticlesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ArticlesRoute
     }
     '/articles/$slug': {
       id: '/articles/$slug'
-      path: '/articles/$slug'
+      path: '/$slug'
       fullPath: '/articles/$slug'
       preLoaderRoute: typeof ArticlesSlugRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ArticlesRoute
     }
   }
 }
@@ -170,13 +191,26 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ArticlesRouteChildren {
+  ArticlesSlugRoute: typeof ArticlesSlugRoute
+  ArticlesIndexRoute: typeof ArticlesIndexRoute
+}
+
+const ArticlesRouteChildren: ArticlesRouteChildren = {
+  ArticlesSlugRoute: ArticlesSlugRoute,
+  ArticlesIndexRoute: ArticlesIndexRoute,
+}
+
+const ArticlesRouteWithChildren = ArticlesRoute._addFileChildren(
+  ArticlesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  ArticlesRoute: ArticlesRouteWithChildren,
   AuthRoute: AuthRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  ArticlesSlugRoute: ArticlesSlugRoute,
-  ArticlesIndexRoute: ArticlesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
