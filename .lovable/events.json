@@ -33,6 +33,44 @@
         }
       }
     },
+    "project.homepage_booking_click": {
+      "event_schema_version": 1,
+      "description": "A visitor clicked a contact or class booking button on the homepage.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "section",
+          "channel"
+        ],
+        "properties": {
+          "section": {
+            "type": "string",
+            "enum": [
+              "hero",
+              "programs",
+              "pricing",
+              "contact",
+              "header",
+              "footer"
+            ]
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "line",
+              "messenger",
+              "phone",
+              "programs"
+            ]
+          }
+        }
+      }
+    },
     "project.related_article_click": {
       "event_schema_version": 1,
       "description": "A visitor clicked a related article card at the bottom of an article.",

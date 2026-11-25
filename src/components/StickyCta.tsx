@@ -43,6 +43,7 @@ export function StickyCta() {
         href={business.lineUrl}
         tabIndex={hidden ? -1 : undefined}
         className="btn btn-primary w-full"
+        onClick={() => window.__lovableEvents?.track?.("project.homepage_booking_click", { section: "contact", channel: "line" })}
       >
         <LineIcon />
         {t.sticky}

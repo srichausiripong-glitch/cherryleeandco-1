@@ -20,3 +20,6 @@
 - [x] Add `/admin` articles tab for teachers to create, edit, save drafts, publish, and delete articles.
 - [x] Add related articles section and contact/register CTA buttons at the bottom of each article page.
 - [x] Instrument article contact/register clicks and related article clicks via built-in Lovable events (`window.__lovableEvents?.track?.`) and validate `.lovable/events.json`.
+- [x] Add cover images (`cover_image_url`, `cover_image_alt`) to articles and expand all 10 articles to 500+ words.
+- [x] Add an analytics dashboard tab in `/admin` comparing views, contact clicks, and class registration clicks per article.
+- [x] Instrument homepage contact and class booking clicks (`project.homepage_booking_click`) to track monthly class booking requests.

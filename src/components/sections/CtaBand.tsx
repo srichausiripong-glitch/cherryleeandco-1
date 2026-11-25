@@ -30,11 +30,19 @@ export function CtaBand() {
           </h2>
           <p className="text-lg text-[#FFF1F4]">{c.body}</p>
           <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3">
-            <ExternalLink href={business.lineUrl} className="btn btn-light btn-lg">
+            <ExternalLink
+              href={business.lineUrl}
+              className="btn btn-light btn-lg"
+              onClick={() => window.__lovableEvents?.track?.("project.homepage_booking_click", { section: "contact", channel: "line" })}
+            >
               <LineIcon />
               {c.line}
             </ExternalLink>
-            <ExternalLink href={business.messenger} className="btn btn-outline-light btn-lg">
+            <ExternalLink
+              href={business.messenger}
+              className="btn btn-outline-light btn-lg"
+              onClick={() => window.__lovableEvents?.track?.("project.homepage_booking_click", { section: "contact", channel: "messenger" })}
+            >
               <MessengerIcon />
               {c.messenger}
             </ExternalLink>

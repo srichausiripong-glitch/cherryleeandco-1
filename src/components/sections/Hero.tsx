@@ -36,11 +36,19 @@ export function Hero() {
           <p className="max-w-[36em] text-[1.15rem] text-ink-soft">{h.lead}</p>
 
           <div className="my-8 flex flex-wrap gap-x-6 gap-y-3">
-            <ExternalLink href={business.lineUrl} className="btn btn-primary btn-lg w-full xs:w-auto">
+            <ExternalLink
+              href={business.lineUrl}
+              className="btn btn-primary btn-lg w-full xs:w-auto"
+              onClick={() => window.__lovableEvents?.track?.("project.homepage_booking_click", { section: "hero", channel: "line" })}
+            >
               <LineIcon />
               {h.ctaPrimary}
             </ExternalLink>
-            <a href="#programs" className="btn btn-ghost btn-lg w-full xs:w-auto">
+            <a
+              href="#programs"
+              className="btn btn-ghost btn-lg w-full xs:w-auto"
+              onClick={() => window.__lovableEvents?.track?.("project.homepage_booking_click", { section: "hero", channel: "programs" })}
+            >
               {h.ctaSecondary}
             </a>
           </div>

@@ -1,7 +1,9 @@
+import { useEffect, useRef } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
-import { listPublishedArticles } from "@/lib/articles.functions";
+import { listPublishedArticles, recordArticleEvent } from "@/lib/articles.functions";
 import { buildArticleJsonLd, parseArticleBody } from "@/lib/articles";
 import { SITE_URL, LINE_URL } from "@/content/business";
 import { Header } from "@/components/Header";
@@ -52,7 +54,16 @@ export const Route = createFileRoute("/articles/$slug")({
 function ArticleDetailPage() {
   const { slug } = Route.useParams();
   const { data: articles } = useSuspenseQuery(articlesQuery);
+  const trackEventFn = useServerFn(recordArticleEvent);
+  const trackedSlugRef = useRef<string | null>(null);
   const article = articles.find((a) => a.slug === slug) ?? null;
+
+  useEffect(() => {
+    if (!article || trackedSlugRef.current === article.slug) return;
+    trackedSlugRef.current = article.slug;
+    void trackEventFn({ data: { slug: article.slug, event_type: "view" } }).catch(() => {});
+  }, [article, trackEventFn]);
+
   if (!article) return null;
   const blocks = parseArticleBody(article.body);
   const otherArticles = articles.filter((a) => a.slug !== article.slug);
@@ -78,6 +89,19 @@ function ArticleDetailPage() {
           <p className="text-sm font-semibold text-cherry">{article.category}</p>
           <h1 className="mt-2 font-display text-3xl font-bold leading-tight sm:text-5xl">{article.title}</h1>
           <p className="mt-4 text-lg leading-relaxed text-ink-soft">{article.summary}</p>
+
+          {article.cover_image_url ? (
+            <figure className="mt-8 overflow-hidden rounded-2xl border-2 border-peach-deep bg-paper">
+              <img
+                src={article.cover_image_url}
+                alt={article.cover_image_alt || article.title}
+                className="aspect-[16/10] w-full object-cover"
+              />
+              {article.cover_image_alt ? (
+                <figcaption className="px-4 py-3 text-sm text-ink-soft">{article.cover_image_alt}</figcaption>
+              ) : null}
+            </figure>
+          ) : null}
 
           {article.quick_answer ? (
             <section aria-labelledby="quick-answer-heading" className="mt-8 rounded-2xl border-2 border-peach-deep bg-paper p-6">
@@ -125,13 +149,14 @@ function ArticleDetailPage() {
               <ExternalLink
                 href={LINE_URL}
                 className="btn btn-primary btn-sm"
-                onClick={() =>
+                onClick={() => {
                   window.__lovableEvents?.track?.("project.article_contact_click", {
                     slug: article.slug,
                     category: article.category,
                     channel: "line",
-                  })
-                }
+                  });
+                  void trackEventFn({ data: { slug: article.slug, event_type: "contact_line" } }).catch(() => {});
+                }}
               >
                 <LineIcon /> ทัก LINE @cherryleeandco
               </ExternalLink>
@@ -139,13 +164,14 @@ function ArticleDetailPage() {
                 to="/"
                 hash="programs"
                 className="btn btn-secondary btn-sm"
-                onClick={() =>
+                onClick={() => {
                   window.__lovableEvents?.track?.("project.article_contact_click", {
                     slug: article.slug,
                     category: article.category,
                     channel: "programs",
-                  })
-                }
+                  });
+                  void trackEventFn({ data: { slug: article.slug, event_type: "contact_programs" } }).catch(() => {});
+                }}
               >
                 ดูตารางเรียนและสมัครคลาส
               </Link>

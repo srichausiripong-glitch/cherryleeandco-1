@@ -18,6 +18,8 @@ export const articleInputSchema = z.object({
   summary: z.string().trim().min(10, "กรุณากรอกคำอธิบายย่อสำหรับ SEO ค่ะ").max(320),
   quick_answer: z.string().trim().max(800).default(""),
   body: z.string().trim().min(20, "กรุณากรอกเนื้อหาบทความค่ะ").max(20000),
+  cover_image_url: z.string().trim().max(500).default(""),
+  cover_image_alt: z.string().trim().max(300).default(""),
   faq_items: z.array(faqItemSchema).max(12).default([]),
   category: z.string().trim().min(1, "กรุณากรอกหมวดหมู่ค่ะ").max(80),
   status: articleStatusSchema,
@@ -32,12 +34,26 @@ export interface ArticleRecord {
   summary: string;
   quick_answer: string;
   body: string;
+  cover_image_url: string;
+  cover_image_alt: string;
   faq_items: FaqItem[];
   category: string;
   status: ArticleStatus;
   published_at: string | null;
   updated_at: string;
   created_at: string;
+}
+
+export interface ArticleAnalyticsRow {
+  slug: string;
+  title: string;
+  category: string;
+  status: ArticleStatus;
+  views: number;
+  contact_line: number;
+  contact_programs: number;
+  total_clicks: number;
+  conversion_rate: number;
 }
 
 export function parseFaqItems(raw: unknown): FaqItem[] {
@@ -90,12 +106,18 @@ export function parseArticleBody(body: string): BodyBlock[] {
 
 export function buildArticleJsonLd(article: ArticleRecord) {
   const url = `${SITE_URL}/articles/${article.slug}`;
+  const imageUrl = article.cover_image_url
+    ? article.cover_image_url.startsWith("http")
+      ? article.cover_image_url
+      : `${SITE_URL}${article.cover_image_url.startsWith("/") ? "" : "/"}${article.cover_image_url}`
+    : undefined;
   const schemas: Record<string, unknown>[] = [
     {
       "@context": "https://schema.org",
       "@type": "Article",
       headline: article.title,
       description: article.summary,
+      ...(imageUrl ? { image: imageUrl } : {}),
       url,
       inLanguage: "th",
       datePublished: article.published_at ?? article.created_at,

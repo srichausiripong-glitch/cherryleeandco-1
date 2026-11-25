@@ -65,20 +65,32 @@ function ArticlesIndexPage() {
         ) : (
           <ul role="list" className="mt-10 grid gap-6 md:grid-cols-2">
             {articles.map((article) => (
-              <li key={article.id} className="flex flex-col justify-between rounded-2xl border-2 border-peach-deep bg-paper p-6">
-                <div>
-                  <p className="text-sm font-semibold text-cherry">{article.category}</p>
-                  <h2 className="mt-2 font-display text-2xl font-bold leading-snug">
-                    <Link to="/articles/$slug" params={{ slug: article.slug }} className="no-underline hover:underline">
-                      {article.title}
-                    </Link>
-                  </h2>
-                  <p className="mt-3 text-base leading-relaxed text-ink-soft">{article.summary}</p>
-                </div>
-                <div className="mt-6">
-                  <Link to="/articles/$slug" params={{ slug: article.slug }} className="inline-flex min-h-11 items-center gap-2 font-semibold text-ink underline-offset-4 hover:underline">
-                    อ่านบทความ <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              <li key={article.id} className="flex flex-col justify-between overflow-hidden rounded-2xl border-2 border-peach-deep bg-paper">
+                {article.cover_image_url ? (
+                  <Link to="/articles/$slug" params={{ slug: article.slug }} className="block aspect-[16/10] w-full overflow-hidden bg-cream">
+                    <img
+                      src={article.cover_image_url}
+                      alt={article.cover_image_alt || article.title}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]"
+                    />
                   </Link>
+                ) : null}
+                <div className="flex flex-1 flex-col justify-between p-6">
+                  <div>
+                    <p className="text-sm font-semibold text-cherry">{article.category}</p>
+                    <h2 className="mt-2 font-display text-2xl font-bold leading-snug">
+                      <Link to="/articles/$slug" params={{ slug: article.slug }} className="no-underline hover:underline">
+                        {article.title}
+                      </Link>
+                    </h2>
+                    <p className="mt-3 text-base leading-relaxed text-ink-soft">{article.summary}</p>
+                  </div>
+                  <div className="mt-6">
+                    <Link to="/articles/$slug" params={{ slug: article.slug }} className="inline-flex min-h-11 items-center gap-2 font-semibold text-ink underline-offset-4 hover:underline">
+                      อ่านบทความ <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
+                  </div>
                 </div>
               </li>
             ))}

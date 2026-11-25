@@ -27,7 +27,11 @@ export function Visit() {
             </li>
             <li className="flex items-center gap-2.5">
               <LineIcon className="h-5 w-5 shrink-0 text-cherry" />
-              <ExternalLink href={business.lineUrl} className="inline-flex min-h-11 items-center">
+              <ExternalLink
+                href={business.lineUrl}
+                className="inline-flex min-h-11 items-center"
+                onClick={() => window.__lovableEvents?.track?.("project.homepage_booking_click", { section: "contact", channel: "line" })}
+              >
                 LINE {business.lineId}
               </ExternalLink>
             </li>

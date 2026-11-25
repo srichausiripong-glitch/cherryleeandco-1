@@ -14,11 +14,34 @@ export type Database = {
   }
   public: {
     Tables: {
+      article_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       articles: {
         Row: {
           author_id: string | null
           body: string
           category: string
+          cover_image_alt: string
+          cover_image_url: string
           created_at: string
           faq_items: Json
           id: string
@@ -34,6 +57,8 @@ export type Database = {
           author_id?: string | null
           body?: string
           category?: string
+          cover_image_alt?: string
+          cover_image_url?: string
           created_at?: string
           faq_items?: Json
           id?: string
@@ -49,6 +74,8 @@ export type Database = {
           author_id?: string | null
           body?: string
           category?: string
+          cover_image_alt?: string
+          cover_image_url?: string
           created_at?: string
           faq_items?: Json
           id?: string

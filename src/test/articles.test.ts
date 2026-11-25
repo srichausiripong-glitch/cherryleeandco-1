@@ -36,6 +36,8 @@ describe("articles schema and SEO/AEO helpers", () => {
       summary: "ภาพรวมคลาสวันเสาร์-อาทิตย์ที่ CherryLee & Co.",
       quick_answer: "เรียนภาษาอังกฤษผ่านละครและการทำอาหารค่ะ",
       body: "## ภาพรวม\nเรียนวันเสาร์-อาทิตย์ 09:00–15:00 น.",
+      cover_image_url: "/images/hero-1100.jpg",
+      cover_image_alt: "บรรยากาศคลาสวันเสาร์-อาทิตย์ที่ CherryLee & Co.",
       faq_items: [{ question: "เปิดวันไหนคะ?", answer: "วันเสาร์และอาทิตย์ค่ะ" }],
       category: "โปรแกรมเรียน",
       status: "published",
